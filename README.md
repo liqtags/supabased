@@ -1,4 +1,4 @@
-# supabased
+# Supabased
 A Python Helper for Supabase Things
 
 Setup
