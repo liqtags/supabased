@@ -2,7 +2,6 @@ import supabase
 from supabase import create_client, Client
 from cryptography.fernet import Fernet
 import os
-from storage3.utils import StorageException
 
 def get_env_value(key):
     try:
@@ -12,8 +11,7 @@ def get_env_value(key):
 
 SUPABASE_URL = get_env_value('SUPABASE_URL')
 SUPABASE_KEY_SERVICE = get_env_value('SUPABASE_KEY_SERVICE')
-
-BUCKET = "directory-audit"
+BUCKET = get_env_value('BUCKET')
 
 def create_supabase_client() -> Client:
     return create_client(SUPABASE_URL, SUPABASE_KEY_SERVICE)
@@ -230,4 +228,130 @@ def sign_in_a_user_through_0auth(supaClient, provider, access_token):
         return supaClient.auth.sign_in_with_oauth(provider, access_token)
     except Exception as e:
         return e.message
+
+# Sign out a user
+def sign_out_a_user(supaClient, access_token):
+    try:
+        return supaClient.auth.sign_out(access_token)
+    except Exception as e:
+        return e.message
+
+# Verify and log in through OTP
+def verify_and_log_in_through_otp(supaClient, email, otp):
+    try:
+        return supaClient.auth.verify_otp(email, otp)
+    except Exception as e:
+        return e.message
     
+# Retrieve a session
+def retrieve_a_session(supaClient, access_token):
+    try:
+        return supaClient.auth.get_session(access_token)
+    except Exception as e:
+        return e.message
+
+# Retrieve a new session
+def retrieve_a_new_session(supaClient, refresh_token):
+    try:
+        return supaClient.auth.refresh_access_token(refresh_token)
+    except Exception as e:
+        return e.message
+
+# Retrieve a user
+def retrieve_a_user(supaClient):
+    try:
+        return supaClient.auth.get_user()
+    except Exception as e:
+        return e.message
+# Set the session data
+def set_the_session_data(supaClient, access_token, refresh_token, data):
+    try:
+        return supaClient.auth.set_session_data(access_token, refresh_token, data)
+    except Exception as e:
+        return e.message
+
+# Create a bucket
+def create_a_bucket(supaClient, bucket_name):
+    try:
+        return supaClient.storage.create_bucket(bucket_name)
+    except Exception as e:
+        return e.message
+    
+def retrieve_a_bucket(supaClient, bucket_name):
+    try:
+        return supaClient.storage.get_bucket(bucket_name)
+    except Exception as e:
+        return e.message
+
+def list_all_buckets(supaClient):
+    try:
+        return supaClient.storage.list_buckets()
+    except Exception as e:
+        return e.message
+
+def delete_a_bucket(supaClient, bucket_name):
+    try:
+        return supaClient.storage.remove_bucket(bucket_name)
+    except Exception as e:
+        return e.message
+
+def empty_a_bucket(supaClient, bucket_name):
+    try:
+        return supaClient.storage.empty_bucket(bucket_name)
+    except Exception as e:
+        return e.message
+
+def upload_a_file(supaClient, bucket_name, file, path, file_options):
+    try:
+        return supaClient.storage.from_(bucket_name).upload(file=file, path=path, file_options=file_options)
+    except Exception as e:
+        return e.message
+
+def download_a_file(supaClient, bucket_name, source):
+    try:
+        return supaClient.storage.from_(bucket_name).download(source)
+    except Exception as e:
+        return e.message
+
+def list_all_files_in_a_bucket(supaClient, bucket_name):
+    try:
+        return supaClient.storage.from_(bucket_name).list()
+    except Exception as e:
+        return e.message
+    
+def replace_an_existing_file(supaClient, bucket_name, file, path, file_options):
+    try:
+        return supaClient.storage.from_(bucket_name).update(file=file, path=path, file_options=file_options)
+    except Exception as e:
+        return e.message
+    
+def move_an_existing_file(supaClient, bucket_name, source, destination):
+    try:
+        return supaClient.storage.from_(bucket_name).move(source, destination)
+    except Exception as e:
+        return e.message
+    
+def delete_files_in_a_bucket(supaClient, bucket_name, path):
+    try:
+        return supaClient.storage.from_(bucket_name).remove(path)
+    except Exception as e:
+        return e.message
+    
+def create_a_signed_url(supaClient, bucket_name, filepath, expiry_duration):
+    try:
+        return supaClient.storage.from_(bucket_name).create_signed_url(filepath, expiry_duration)
+    except Exception as e:
+        return e.message
+    
+def retrieve_public_url(supaClient, bucket_name, filepath):
+    try:
+        return supaClient.storage.from_(bucket_name).get_public_url(filepath)
+    except Exception as e:
+        return e.message
+
+def invoke_a_function(supaClient, function_name, invoke_options):
+    try:
+        return supaClient.functions.invoke(function_name, invoke_options)
+    except Exception as e:
+        return e.message
+
