@@ -1,5 +1,5 @@
 # Supabased
-A Python Helper for Supabase Things
+A Python Helper for Supabase
 
 Setup
 -----
