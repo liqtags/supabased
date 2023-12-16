@@ -2,6 +2,7 @@ import supabase
 from supabase import create_client, Client
 from cryptography.fernet import Fernet
 import os
+# from penv import SUPABASE_URL, SUPABASE_KEY_SERVICE, BUCKET
 
 def get_env_value(key):
     try:
@@ -11,7 +12,7 @@ def get_env_value(key):
 
 SUPABASE_URL = get_env_value('SUPABASE_URL')
 SUPABASE_KEY_SERVICE = get_env_value('SUPABASE_KEY_SERVICE')
-BUCKET = get_env_value('BUCKET')
+BUCKET = get_env_value('BUCKET') 
 
 def create_supabase_client() -> Client:
     return create_client(SUPABASE_URL, SUPABASE_KEY_SERVICE)
@@ -30,10 +31,19 @@ def check_if_data_exists_on_supbase(supaClient, table_name, column_name, column_
     
     return False
 
+def base_query(supaClient, table_name):
+    return supaClient.table(table_name).select("*")
+
 # DATABASE
 def fetch_data(supaClient, table_name, column_name, column_value):
     try:
         return supaClient.table(table_name).select("*").eq(column_name, column_value).execute()
+    except Exception as e:
+        return e.message
+
+def fetch_data_list(supaClient, table_name):
+    try:
+        return supaClient.table(table_name).select("*").execute()
     except Exception as e:
         return e.message
     
@@ -354,4 +364,28 @@ def invoke_a_function(supaClient, function_name, invoke_options):
         return supaClient.functions.invoke(function_name, invoke_options)
     except Exception as e:
         return e.message
+    
+# Initialize the base query
+def filter_by_match_array(supaClient, match_array, table):
+    query = base_query(supaClient, table)
+    for item in match_array:
+        attribute = item["attribute"]
+        plan_value = item["value"]
+        value = item["value"]
+
+        if attribute.find('->') != -1: 
+            value = f'"{value}"'
+        
+        # if filter type is like we need to add like
+        if "type" in item:
+            if item["type"] == "like":
+                if attribute.find('->') != -1: 
+                    # TODO: https://stackoverflow.com/questions/42918348/postgresql-json-like-query
+                    continue
+                query = query.like(attribute, f'%{plan_value}%')
+            # TODO: add other types like bigger than, smaller than, etc
+        else:
+            query = query.eq(attribute, value)
+        
+    return query.execute()
 
